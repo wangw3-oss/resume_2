@@ -1,10 +1,15 @@
 import type { OcrResponse, SuggestionsResponse } from "../types";
 
+// 【关键修复点】从环境变量中读取后端真实地址
+// 如果读取不到（比如本地开发且没配环境变量），则退回到本地默认值
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+
 export async function ocrResume(file: File): Promise<OcrResponse> {
   const form = new FormData();
   form.append("file", file);
 
-  const resp = await fetch("/api/ocr", {
+  // 【关键修复点】使用模板字符串拼接完整的后端 URL
+  const resp = await fetch(`${API_BASE_URL}/api/ocr`, {
     method: "POST",
     body: form,
   });
@@ -17,7 +22,8 @@ export async function ocrResume(file: File): Promise<OcrResponse> {
 }
 
 export async function generateSuggestions(resumeId: number): Promise<SuggestionsResponse> {
-  const resp = await fetch("/api/suggestions", {
+  // 【关键修复点】使用模板字符串拼接完整的后端 URL
+  const resp = await fetch(`${API_BASE_URL}/api/suggestions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -31,4 +37,3 @@ export async function generateSuggestions(resumeId: number): Promise<Suggestions
   }
   return (await resp.json()) as SuggestionsResponse;
 }
-
